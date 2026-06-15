@@ -3,33 +3,37 @@ SpotifyCopycat
 
 
 ```markdown
-#Music Assistant Setup with YouTube Bypass (PO Token) & Remote Access
+# Music Assistant Setup with Spotify Integration & Remote Access
 
-This repository documents the deployment and configuration of **Music Assistant** in a Docker environment on an Ubuntu server. It addresses the recent strict YouTube Music playback restrictions using an automated **PO Token generator** and ensures secure remote access from anywhere (e.g., mobile data) using a **Tailscale VPN**.
+This repository documents the deployment and configuration of **Music Assistant** in a Docker environment on an Ubuntu server, focusing on unifying the Spotify library and ensuring secure remote streaming from anywhere via **Tailscale VPN**.
 
 ---
 
-#Architecture & Services Overview
+##Architecture & Services Overview
 
-* **Music Assistant Server:** A modern music streaming aggregator that unifies services like Spotify, YouTube Music, and local libraries.
-* **YT Music PO Token Generator (`bgutil-ytdlp-pot-provider`):** A lightweight background API provider that constantly spins up Proof of Origin tokens to bypass YouTube's strict anti-bot systems.
+* **Music Assistant Server:** A modern music streaming aggregator running in Docker that bridges and hosts your media platforms (configured using Spotify).
 * **Tailscale:** A secure, zero-config Mesh VPN network that links your phone to your home server securely without opening firewall ports on your ISP router.
 
 ---
 
-#Step-by-Step Deployment Guide
+##Step-by-Step Deployment Guide
 
-### Step 1 - Deploy the PO Token Generator
-To fix playback authentication crashes from YouTube Music, deploy the community-verified token generator. 
-
-Running this container in `host` network mode ensures that the Music Assistant container can query the local loopback interface effortlessly on port `4416`:
+### Step 1: Deploy the Music Assistant Server
+Create the local persistence directory and deploy the stable Music Assistant container mapping the default streaming and web UI ports:
 
 ```bash
+# Create persistent storage folder
+mkdir -p /home/$your-name$/music-assistant ##(path_folder)
+
+# Run the container
 docker run -d \
-  --name yt-po-token-generator \
+  --name music-assistant \
   --restart unless-stopped \
-  --network host \
-  brainicism/bgutil-ytdlp-pot-provider:latest
+  --privileged \
+  -p 8095:8095 \
+  -p 8096:8096 \
+  -v /home/$your-name$/music-assistant:/data \   ##(path_folder)
+  ghcr.io/music-assistant/server:stable
 
 
 
